@@ -1,0 +1,63 @@
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.local
+.env
+.env.local
+.env.*
+
+# Rust
+target/
+Cargo.lock
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+
+# Coverage
+.coverage
+coverage/
+htmlcov/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+```
