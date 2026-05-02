@@ -1,87 +1,73 @@
-# Simulador de Partículas Controladas por Gestos
+# AetherSim 🌌
 
-Este proyecto es un simulador de partículas interactivo que utiliza:
-- **Rust** (compilado a WebAssembly) para la simulación de partículas de alto rendimiento
-- **Python** con MediaPipe para el reconocimiento de gestos de manos
-- **HTML/CSS/JavaScript** para la interfaz web
+**AetherSim** es un simulador de partículas altamente optimizado e interactivo, controlado íntegramente mediante gestos de la mano.
 
-## Estructura del Proyecto
+Al combinar la brutal velocidad de cálculo de **Rust** con la flexibilidad y el ecosistema de IA de **Python**, el proyecto es capaz de simular las físicas y el renderizado visual de cientos de miles de partículas de manera asíncrona a 60 Fotogramas por Segundo.
 
-```
-/workspace
-├── rust_particles/          # Código Rust para simulación de partículas
-│   ├── Cargo.toml           # Configuración del proyecto Rust
-│   └── src/
-│       └── lib.rs           # Lógica de simulación de partículas
-├── python_gestures/         # Código Python para detección de gestos
-│   ├── gesture_server.py    # Servidor Flask para detección de gestos
-│   └── requirements.txt     # Dependencias de Python
-└── web/                     # Interfaz web
-    └── index.html           # Página principal del simulador
-```
+---
 
-## Requisitos Previos
+## 🏗️ Arquitectura Técnica
 
-### Para Rust/WebAssembly:
-1. Instalar Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-2. Instalar wasm-pack: `cargo install wasm-pack`
-3. Compilar para WebAssembly:
-   ```bash
-   cd rust_particles
-   wasm-pack build --target web
-   ```
+El proyecto está diseñado bajo una arquitectura de lenguajes híbridos, usando FFI (Foreign Function Interfaces) para la transferencia de datos a coste cero.
 
-### Para Python:
-1. Instalar dependencias:
-   ```bash
-   cd python_gestures
-   pip install -r requirements.txt
-   ```
+### Backend de Físicas (Rust)
+* **Librería Core (`aether_core`)**: Construida con PyO3. Posee un objeto de simulación estado persistente (`Simulacion`).
+* **Matemáticas**: Calcula en cada _tick_ un modelo gravitacional para las partículas, evaluando la tracción, repulsión, fricción (`drag`) y el sistema de colisiones con los bordes de la pantalla.
+* **Integración de Memoria**: Devuelve punteros de memoria transformados en `numpy::PyArray1` para evitar la sobrecarga de copias al enviar las coordenadas de regreso a Python.
 
-## Cómo Ejecutar
+### Frontend y Visión Artificial (Python)
+* **Reconocimiento Óptico (MediaPipe)**: Implementa el modelo pre-entrenado `hand_landmarker.task` en su modo `RunningMode.VIDEO` (que brinda rastreo temporal).
+* **Heurísticas Lógicas**: A través de análisis euclidiano entre las falanges y nudillos (puntos de articulación intermedios / PIP), Python infiere en tiempo real los gestos del usuario.
+* **Renderizado con PyGame**: Dado que trazar decenas de miles de elipses de forma individual es inviable para la CPU en Python, se utilizó `pygame.surfarray` para inyectar directamente la matriz vectorial de píxeles (`numpy array`) calculada por Rust sobre la pantalla.
 
-### Paso 1: Iniciar el servidor de gestos (Python)
+---
+
+## ✋ Sistema de Gestos y Respuestas
+
+El modelo aplica filtros de Interpolación Lineal (Lerp) para asegurar que el centro de la gravedad (la mano del usuario) se mueva de forma natural. 
+
+Las físicas son dinámicas dependiendo del gesto detectado:
+
+| Gesto | Efecto en la Física | Variables (Foco / Fricción) |
+| --- | --- | --- | --- |
+| **Mano Abierta** | Gravedad natural, órbita y atracción leve. | 1500.0 / 0.98|
+| **Puño Cerrado** | "Agujero Negro" compacto. Arrastra la materia. | 40000.0 / 0.65 |
+| **1 Dedo (Índice)** | Aspersor. Dispara 150 partículas nuevas/frame. | 2000.0 / 0.95 |
+| **Amor y Paz (✌️)** | Campo de fuerza repelente. Aleja la materia. | -40000.0 / 0.90 |
+| **Rock (🤘)** | Hiper-explosión de dispersión inmediata. | -200000.0 / 0.99 |
+| **Promesa (Meñique)** | Congelación temporal absoluta. | 0.0 / 0.00 |
+
+---
+
+## ⚙️ Instrucciones de Desarrollo / Compilación
+
+### Requisitos Previos
+* **Python** >= 3.8
+* **Rust / Cargo** configurado localmente.
+
+### Entorno Virtual y Dependencias
+Dado que usamos librerías pesadas y enlaces nativos (PyO3), es recomendado el uso de `.venv`.
 ```bash
-cd /workspace/python_gestures
-python gesture_server.py
+# Crear entorno y activarlo
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# Instalar requisitos de Python
+pip install maturin mediapipe opencv-python pygame numpy
 ```
 
-### Paso 2: Abrir la página web
-Abre `/workspace/web/index.html` en tu navegador. Puedes usar un servidor HTTP local:
+### Compilar el Motor de Físicas
+El entorno de Python usa un paquete de desarrollo llamado `maturin` que invoca internamente a `Cargo` para construir la librería en C/Rust y empaquetarla transparentemente.
 ```bash
-cd /workspace/web
-python -m http.server 8080
+# Si usas Python 3.13, debes invocar esta bandera de retrocompatibilidad antes de compilar
+$env:PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
+
+# Construir librería Rust e instalarla temporalmente
+maturin develop --release
 ```
-Luego navega a `http://localhost:8080`
 
-## Funcionalidades de Gestos
-
-1. **Mano abierta**: Repele las partículas
-2. **Puño cerrado**: Atrae las partículas
-3. **Mano semi-abierta**: Mueve las partículas
-4. **Click en el canvas**: Añade partículas en esa posición
-
-## Controles en la Interfaz
-
-- **Iniciar Cámara**: Activa la detección de gestos
-- **Detener Cámara**: Desactiva la detección de gestos
-- **Añadir Partículas**: Agrega más partículas al centro
-- **Slider de cantidad**: Ajusta el número inicial de partículas
-
-## Tecnologías Utilizadas
-
-- **Rust**: Lenguaje de programación sistémico de alto rendimiento
-- **wasm-bindgen**: Para interoperabilidad entre Rust y JavaScript
-- **WebAssembly**: Para ejecutar código Rust en el navegador
-- **Python**: Para procesamiento de visión por computadora
-- **MediaPipe**: Para detección de manos y gestos
-- **OpenCV**: Para procesamiento de imágenes
-- **Flask**: Servidor web para API de gestos
-- **HTML5 Canvas**: Para renderizado de partículas
-
-## Notas Importantes
-
-1. Necesitas una cámara web funcional para la detección de gestos
-2. El servidor Python debe estar ejecutándose para que funcione la detección de gestos
-3. La compilación de Rust a WebAssembly genera archivos en `rust_particles/pkg/`
-4. El proyecto funciona sin el servidor Python, pero solo con interacción por mouse
+### Ejecución
+```bash
+python app.py
+```
+*(Nota: El modelo de Machine Learning `hand_landmarker.task` de Google se descargará de manera automática en el primer arranque del programa).*
