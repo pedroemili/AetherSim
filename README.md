@@ -28,15 +28,16 @@ El modelo aplica filtros de Interpolación Lineal (Lerp) para asegurar que el ce
 
 Las físicas son dinámicas dependiendo del gesto detectado:
 
-| Gesto | Efecto en la Física | Variables (Foco / Fricción) |
-| --- | --- | --- | --- |
-| **Mano Abierta** | Gravedad natural, órbita y atracción leve. | 1500.0 / 0.98|
-| **Puño Cerrado** | "Agujero Negro" compacto. Arrastra la materia. | 40000.0 / 0.65 |
-| **1 Dedo (Índice)** | Aspersor. Dispara 150 partículas nuevas/frame. | 2000.0 / 0.95 |
-| **Amor y Paz (✌️)** | Campo de fuerza repelente. Aleja la materia. | -40000.0 / 0.90 |
-| **Rock (🤘)** | Hiper-explosión de dispersión inmediata. | -200000.0 / 0.99 |
-| **Promesa (Meñique)** | Congelación temporal absoluta. | 0.0 / 0.00 |
 
+
+| Gesto | Efecto en la Física | Variables (Foco / Fricción) |
+| --- | --- | --- |
+| **Mano Abierta**  | Gravedad natural, órbita y atracción leve. | 1500.0 / 0.98 |
+| **Puño Cerrado** | "Agujero Negro" compacto. Arrastra la materia. | 40000.0 / 0.65 |
+| **1 Dedo(Índice)** | Aspersor. Dispara 150 partículas nuevas/frame. | 2000.0 / 0.95 |
+| **Amor y Paz(✌️)** | Campo de fuerza repelente. Aleja la materia. | -40000.0 / 0.90 |
+| **Rock(🤘)** | Hiper-explosión de dispersión inmediata. | -200000.0 / 0.99 |
+| **Promesa(Meñique)** | Congelación temporal absoluta. | 0.0 / 0.00 |
 ---
 
 ## ⚙️ Instrucciones de Desarrollo / Compilación
